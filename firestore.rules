@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for role and authentication verification
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. User Profiles Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+      allow delete: if false; // User records must not be deleted directly
+    }
+
+    // 2. Transactions & Ingested Datasets
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    // 3. Investigation Dossiers & Multi-Agent Findings
+    match /investigations/{investigationId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    // 4. Compliance & SAR Reports
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    // 5. Immutable Regulatory Audit Logs
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Strict immutability for compliance logs
+    }
+
+    // Default deny-all fallback for any unspecified paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
