@@ -6,12 +6,13 @@ RiskLens AI is an enterprise-grade financial fraud detection and investigation p
 
 ---
 
-## 🌐 Live Deployment
+# 🌐 Live Demo
 
-🚀 **Experience RiskLens AI Live**
+## Frontend (Vercel)
+https://risklens-platform.vercel.app/
 
-> **Live Application:**  
-> https://risklensai.onrender.com/
+## Backend API (Render)
+https://risklensai.onrender.com/api/health
 
 🎥 **Demo Video:**  
 > https://youtu.be/4wi41GWFnvA
