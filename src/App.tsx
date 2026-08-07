@@ -68,7 +68,7 @@ function MainApp() {
   // Handle page navigation
   const handleNavigate = useCallback((page: string) => {
     const isPublicPage = page === 'landing' || page === 'login';
-    
+
     // If navigating to a protected page while not authenticated:
     if (!isPublicPage && !isAuthenticated) {
       if (isStudioEnvironment) {
@@ -193,10 +193,12 @@ function MainApp() {
       ) : (
         <div className="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 gap-6 pb-12">
           {/* Floating Sidebar */}
-          <Sidebar
-            activePage={activePage}
-            onNavigate={handleNavigate}
-          />
+          <div className="hidden lg:block">
+            <Sidebar
+              activePage={activePage}
+              onNavigate={handleNavigate}
+            />
+          </div>
 
           {/* Page Content Container */}
           <main className="flex-1 min-w-0 py-2 sm:py-3">

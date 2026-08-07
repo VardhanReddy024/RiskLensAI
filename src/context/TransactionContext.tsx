@@ -3,6 +3,7 @@ import { Transaction, RiskTier, TransactionStatus } from '../types';
 import { INITIAL_TRANSACTIONS } from '../data/sample_datasets';
 import { getRiskTier } from '../lib/utils';
 import { evaluateTransactionWithML } from '../lib/ml_engine';
+import { apiFetch } from "../lib/api";
 
 interface TransactionContextType {
   transactions: Transaction[];
@@ -16,7 +17,7 @@ interface TransactionContextType {
   resolveTransaction: (id: string, action: 'APPROVE' | 'HOLD' | 'ESCALATE' | 'REJECT', notes?: string) => Promise<void>;
   getTransactionById: (id: string) => Transaction | undefined;
   refreshTransactions: () => Promise<void>;
-  
+
   // Quick metrics
   metrics: {
     totalCount: number;
@@ -43,7 +44,7 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
   const refreshTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/transactions');
+      const res = await apiFetch('/api/transactions');
       if (res.ok) {
         const data = await res.json();
         if (data.transactions && data.transactions.length > 0) {
@@ -68,7 +69,7 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
   const ingestBatch = useCallback(async (newTxns: Transaction[]) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/transactions/batch', {
+      const res = await apiFetch('/api/transactions/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactions: newTxns })
@@ -116,7 +117,7 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
     }));
 
     try {
-      await fetch('/api/actions/resolve', {
+      await apiFetch('/api/actions/resolve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -167,8 +168,8 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
       const mIdx = Math.floor(Math.random() * merchants.length);
       const merchant = merchants[mIdx];
       const loc = cities[Math.floor(Math.random() * cities.length)];
-      
-      const amount = isAnomalous 
+
+      const amount = isAnomalous
         ? Math.round(merchant.avg * (2 + Math.random() * 4) * 100) / 100
         : Math.round(merchant.avg * (0.6 + Math.random() * 0.8) * 100) / 100;
 
@@ -257,13 +258,13 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
     const approvedCount = transactions.filter(t => t.status === 'approved').length;
     const heldCount = transactions.filter(t => t.status === 'held').length;
     const rejectedCount = transactions.filter(t => t.status === 'rejected').length;
-    
+
     const totalLossPrevented = transactions
       .filter(t => t.status === 'rejected' || t.status === 'held' || t.riskTier === 'CRITICAL')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const totalVolume = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
-    const avgRiskScore = totalCount > 0 
+    const avgRiskScore = totalCount > 0
       ? Math.round(transactions.reduce((sum, t) => sum + t.riskScore, 0) / totalCount)
       : 0;
 

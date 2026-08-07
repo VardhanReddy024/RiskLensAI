@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useRef } from 
 import { InvestigationDossier, Transaction } from '../types';
 import { evaluateTransactionWithML } from '../lib/ml_engine';
 import { HISTORICAL_FRAUD_CASES } from '../data/historical_cases';
+import { apiFetch } from "../lib/api";
 
 interface InvestigationContextType {
   activeDossier: InvestigationDossier | null;
@@ -143,7 +144,7 @@ export function InvestigationProvider({ children }: { children: React.ReactNode 
   const [isInvestigating, setIsInvestigating] = useState<boolean>(false);
   const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
   const [isSendingMessage, setIsSendingMessage] = useState<boolean>(false);
-  
+
   // Ref to track ongoing or completed investigation requests
   const activeTxnRef = useRef<string | null>(null);
 
@@ -163,7 +164,7 @@ export function InvestigationProvider({ children }: { children: React.ReactNode 
     setActiveTransactionId(transaction.id);
 
     try {
-      const res = await fetch(`/api/investigate/${transaction.id}`, {
+      const res = await apiFetch(`/api/investigate/${transaction.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transaction })
@@ -214,7 +215,7 @@ export function InvestigationProvider({ children }: { children: React.ReactNode 
     setIsSendingMessage(true);
 
     try {
-      const res = await fetch('/api/copilot/chat', {
+      const res = await apiFetch('/api/copilot/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
