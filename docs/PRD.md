@@ -72,7 +72,7 @@ The system must execute the following agents sequentially and concurrently:
 ## 8. System Architecture Overview
 The system utilizes a **Hybrid Micro-Monolith** architecture:
 *   **Frontend:** React 19 SPA hosted on Vercel.
-*   **Backend:** Node.js 22 / Express API hosted on Google Cloud Run.
+*   **Backend:** Node.js 22 / Express API hosted on Vercel and Render
 *   **AI Layer:** Google Gemini 2.5 Flash via `@google/genai`.
 *   **Data Layer:** Firestore (Persistence) + Qdrant (Vector Memory).
 

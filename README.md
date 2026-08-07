@@ -6,6 +6,35 @@ RiskLens AI is an enterprise-grade financial fraud detection and investigation p
 
 ---
 
+## 🌐 Live Deployment
+
+🚀 **Experience RiskLens AI Live**
+
+> **Live Application:**  
+> https://risklensai.onrender.com/
+
+🎥 **Demo Video:**  
+> https://youtu.be/4wi41GWFnvA
+
+📂 **GitHub Repository:**  
+> https://github.com/VardhanReddy024/RiskLensAI
+
+---
+
+### 📌 Current Deployment
+
+| Service | Platform | Status |
+|---------|----------|--------|
+| 🌐 Live Application | Vercel & Render  | ✅ Online |
+| 🔐 Authentication | Firebase Authentication | ✅ Active |
+| 🤖 AI Engine | Google Gemini API | ✅ Active |
+| 📊 Dashboard | Production Ready | ✅ Live |
+| 📱 Responsive UI | Desktop & Mobile | ✅ Supported |
+
+
+
+---
+
 # Demo Video
 
 https://youtu.be/4wi41GWFnvA
@@ -179,19 +208,7 @@ VITE_API_URL=http://localhost:3000
 ```
 
 ---
-# 🌐 Live Deployment
 
-## Frontend (Vercel)
-
-Coming Soon
-
-## Backend API (Google Cloud Run)
-
-Coming Soon
-
-## Demo Video
-
-https://youtu.be/4wi41GWFnvA
 
 ## Source Code
 
