@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import path from "path";
+import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { INITIAL_TRANSACTIONS } from "./src/data/sample_datasets";
 import { Transaction, AuditLog } from "./src/types";
@@ -10,6 +11,16 @@ import { evaluateTransactionWithML } from "./server/ml_engine";
 
 async function startServer() {
   const app = express();
+  app.use(
+    cors({
+      origin: [
+        "https://risklens-platform.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+      ],
+      credentials: true,
+    })
+  );
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '50mb' }));
@@ -70,7 +81,7 @@ async function startServer() {
     }
     if (search) {
       const q = String(search).toLowerCase();
-      results = results.filter(t => 
+      results = results.filter(t =>
         t.id.toLowerCase().includes(q) ||
         t.customerId.toLowerCase().includes(q) ||
         (t.customerName && t.customerName.toLowerCase().includes(q)) ||
@@ -272,13 +283,13 @@ async function startServer() {
     const flaggedCount = transactionsDb.filter(t => t.status === 'flagged' || t.status === 'held' || t.status === 'rejected').length;
     const rejectedCount = transactionsDb.filter(t => t.status === 'rejected').length;
     const approvedCount = transactionsDb.filter(t => t.status === 'approved').length;
-    
+
     const totalLossPrevented = transactionsDb
       .filter(t => t.status === 'rejected' || t.status === 'flagged' || t.status === 'held')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const totalVolume = transactionsDb.reduce((sum, t) => sum + (t.amount || 0), 0);
-    const avgRiskScore = totalTransactions > 0 
+    const avgRiskScore = totalTransactions > 0
       ? Math.round(transactionsDb.reduce((sum, t) => sum + t.riskScore, 0) / totalTransactions)
       : 0;
 
