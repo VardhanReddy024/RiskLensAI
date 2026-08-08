@@ -1,6 +1,5 @@
 # RiskLens AI
 
-[![Build Status](https://github.com/VardhanReddy024/RiskLensAI/actions/workflows/ci.yml/badge.svg)](https://github.com/VardhanReddy024/RiskLensAI/actions/workflows/ci.yml)
 
 [![Tests](https://img.shields.io/badge/tests-92%20passed-success?style=flat&logo=vitest&logoColor=white)](https://github.com/VardhanReddy024/RiskLensAI/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen?style=flat&logo=vitest&logoColor=white)](https://github.com/VardhanReddy024/RiskLensAI/actions/workflows/ci.yml)
