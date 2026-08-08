@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+
+# Build & Test
+dist/
+build/
+coverage/
+.vitest/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Cache
+.cache/
+
+# TypeScript
+*.tsbuildinfo__pycache__/
+__pycache__/
