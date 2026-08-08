@@ -10,36 +10,52 @@
 
 RiskLens AI is an enterprise financial fraud intelligence platform combining Firebase Google Sign-In, 8-agent AI risk orchestration, explainable graph analytics, real-time ML risk scoring, PostgreSQL relational persistence, and automated CI/CD pipeline verification.
 
----
-
 ## 🌐 Production URLs & Deployment Architecture
 
-- **Live Production Application:** https://risklensai.onrender.com
-- **Frontend SPA (Vercel Ready):** https://risklens-platform.vercel.app/
-- **Backend API Gateway (`/api/health`):** https://risklensai.onrender.com/api/health
-- **GitHub Repository:** https://github.com/VardhanReddy024/RiskLensAI
+* 🚀 **Live Production Application:** https://risklens-platform.vercel.app/
+* ⚡ **Backend API (Modal):** https://rvardhan791--risklens-ai-backend-run-server.modal.run
+* 💚 **Backend Health Check:** https://rvardhan791--risklens-ai-backend-run-server.modal.run/api/health
+* 💻 **GitHub Repository:** https://github.com/VardhanReddy024/RiskLensAI
 
+### 🏗️ Production Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │   Vercel Frontend   │
+                    │   React + Vite      │
+                    └──────────┬──────────┘
+                               │
+                               │ HTTPS API
+                               ▼
+                    ┌─────────────────────┐
+                    │   Modal Backend     │
+                    │   Express + Node.js  │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+          Gemini API         Qdrant          ML Engine
+              │                │                │
+              └────────────────┼────────────────┘
+                               ▼
+                       8-Agent AI Swarm
+                               │
+                               ▼
+                   Fraud Investigation
+                               │
+                               ▼
+                  Investigation Dossier
 ```
-                                    +-----------------------+
-                                    |     USERS / SPA       |
-                                    |   (Vercel CDN / SPA)  |
-                                    +-----------+-----------+
-                                                |
-                                                |  HTTPS / REST
-                                                v
-                                    +-----------------------+
-                                    | Modal / Express API   |
-                                    | (Serverless Endpoint) |
-                                    +-----+-----------+-----+
-                                          |           |
-                     +--------------------+           +--------------------+
-                     |                                                     |
-                     v                                                     v
-        +-------------------------+                           +------------------------+
-        | PostgreSQL Database     |                           |  Server Gemini API     |
-        | (Relational Store)      |                           |   (8-Agent Pipeline)   |
-        +-------------------------+                           +------------------------+
-```
+
+> **Authentication:** Firebase Authentication with Google Sign-In.
+>
+> **Frontend:** Vercel.
+>
+> **Backend:** Modal Serverless Web Function.
+>
+> **AI:** Google Gemini + ML Risk Engine + Qdrant Retrieval.
+>
+> **Current data store:** In-memory fallback for the deployed demo environment.
 
 ---
 
