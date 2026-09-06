@@ -66,7 +66,23 @@ jobs:
   build-verification:
     name: 🏗️ Quality & Build Verification Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: risklens_ai_test
+          POSTGRES_USER: risklens_test
+          POSTGRES_PASSWORD: risklens_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U risklens_test -d risklens_ai_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
@@ -85,20 +101,29 @@ jobs:
             npm install
           fi
 
-      - name: 📊 Evaluate Fraud Model
-        run: npm run model:evaluate
-
-      - name: 🛡️ Security Audit Gate
-        run: npm run security:audit
-
       - name: 🔍 Type Check & Linting Gate
         run: npm run lint
 
       - name: 🧪 Automated Test Suite Gate
-        run: npm run test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://risklens_test:risklens_test_password@localhost:5432/risklens_ai_test
+          DATA_STORE_PROVIDER: postgres
+          STRICT_DATABASE: 'true'
+          DATABASE_SSL: 'false'
+          ALLOW_DEV_TEST_TOKENS: 'true'
+          RAZORPAY_MODE: test
+          RAZORPAY_WEBHOOK_SECRET: cd-test-webhook-secret
+        run: npm test
 
-      - name: 🚀 Production Bundle Generation
+      - name: 📊 Evaluate Fraud Model
+        run: npm run model:evaluate
+
+      - name: 🏗️ Production Bundle Generation
         run: npm run build
+
+      - name: 🛡️ Security Vulnerability Audit
+        run: npm run security:audit
 
       - name: 📦 Archive Production Dist Artifact
         uses: actions/upload-artifact@v4
