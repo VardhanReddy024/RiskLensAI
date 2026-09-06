@@ -1,0 +1,6 @@
+{
+  "name": "RiskLens AI",
+  "description": "Enterprise AI Financial Fraud Prevention Platform featuring Multi-Agent Autonomous Consensus, ML Risk Scoring, SHAP Explainability, Qdrant Vector Case Retrieval, and the flagship Fraud Relationship Intelligence Graph for uncovering organized crime rings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

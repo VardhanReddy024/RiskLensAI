@@ -1,0 +1,322 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --bg-canvas: #FAFBFD;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-canvas);
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.012em;
+    overflow-x: hidden;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* =========================================================================
+   LAYERED ENTERPRISE SAAS AMBIENT CANVAS & BACKGROUND DEPTH
+   ========================================================================= */
+.bg-enterprise-canvas {
+  background-color: #FAFBFD;
+  background-image: 
+    /* Layer 1: Top-left vibrant blue radial spotlight */
+    radial-gradient(ellipse 700px 550px at 0% 0%, rgba(59, 130, 246, 0.14) 0%, transparent 70%),
+    /* Layer 2: Top-right vibrant purple radial spotlight */
+    radial-gradient(ellipse 650px 500px at 100% 0%, rgba(147, 51, 234, 0.12) 0%, transparent 68%),
+    /* Layer 3: Bottom-center glowing cyan radial spotlight */
+    radial-gradient(ellipse 850px 600px at 50% 100%, rgba(6, 182, 212, 0.12) 0%, transparent 70%),
+    /* Layer 4: Soft ambient central glow */
+    radial-gradient(circle 900px at 50% 40%, rgba(238, 244, 255, 0.6) 0%, transparent 75%),
+    /* Layer 5: High-definition micro geometric grid texture */
+    radial-gradient(rgba(99, 102, 241, 0.12) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
+}
+
+/* =========================================================================
+   22PX RADIUS GLASSMORPHIC CARDS WITH MULTI-TIER SHADOW DEPTH
+   ========================================================================= */
+.enterprise-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  box-shadow: 
+    0 0 0 1px rgba(226, 232, 240, 0.7),
+    0 1px 3px 0 rgba(15, 23, 42, 0.03),
+    0 10px 28px -4px rgba(15, 23, 42, 0.05),
+    0 24px 48px -12px rgba(15, 23, 42, 0.03);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.25s ease;
+  position: relative;
+}
+
+.enterprise-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2), rgba(226, 232, 240, 0.6));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.enterprise-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 0 1px rgba(199, 210, 254, 0.9),
+    0 8px 16px -2px rgba(15, 23, 42, 0.04),
+    0 18px 40px -4px rgba(15, 23, 42, 0.08),
+    0 32px 64px -12px rgba(99, 102, 241, 0.08);
+}
+
+.enterprise-card-static {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  box-shadow: 
+    0 0 0 1px rgba(226, 232, 240, 0.7),
+    0 1px 3px 0 rgba(15, 23, 42, 0.03),
+    0 10px 28px -4px rgba(15, 23, 42, 0.05);
+  position: relative;
+}
+
+/* =========================================================================
+   FLOATING GLASS NAVIGATION (HEADER & SIDEBAR)
+   ========================================================================= */
+.floating-glass-nav {
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  box-shadow: 
+    0 0 0 1px rgba(226, 232, 240, 0.8),
+    0 8px 32px -4px rgba(15, 23, 42, 0.06),
+    0 1px 4px 0 rgba(15, 23, 42, 0.02);
+}
+
+/* =========================================================================
+   PREMIUM BUTTONS WITH GRADIENT ILLUMINATION & HOVER SHIMMER
+   ========================================================================= */
+.btn-premium-primary {
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 14px;
+  box-shadow: 
+    0 2px 10px -1px rgba(79, 70, 229, 0.38),
+    0 8px 20px -2px rgba(79, 70, 229, 0.25);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-premium-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-premium-primary:hover {
+  background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 16px 0 rgba(79, 70, 229, 0.5),
+    0 12px 28px -2px rgba(79, 70, 229, 0.35);
+}
+
+.btn-premium-primary:hover::after {
+  left: 100%;
+}
+
+.btn-premium-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-premium-secondary {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  color: #334155;
+  font-weight: 600;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 14px;
+  box-shadow: 
+    0 1px 3px 0 rgba(15, 23, 42, 0.03),
+    0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium-secondary:hover {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 4px 14px -2px rgba(15, 23, 42, 0.08),
+    0 8px 24px -4px rgba(15, 23, 42, 0.06);
+}
+
+.btn-premium-secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* =========================================================================
+   KEYFRAME ANIMATIONS: FLOAT, PULSE-GLOW, SHIMMER
+   ========================================================================= */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(10px) rotate(-1deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 5s ease-in-out infinite;
+}
+
+.animate-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient-move 4s ease infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* =========================================================================
+   A4 PORTRAIT ENTERPRISE REPORT PRINT STYLES
+   ========================================================================= */
+@page {
+  size: A4 portrait;
+  margin: 10mm 10mm 12mm 10mm;
+}
+
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide screen-only chrome */
+  nav, 
+  header, 
+  aside, 
+  .floating-glass-nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Expand report to full print width */
+  [data-report-root="true"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+  }
+
+  [data-report-page] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100vh !important;
+    break-after: page !important;
+    page-break-after: always !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 20mm 15mm !important;
+  }
+
+  [data-report-page]:last-child {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Prevent awkward page break cuts inside cards and tables */
+  table, 
+  tr, 
+  .enterprise-card,
+  .enterprise-card-static,
+  .break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure all background colors & borders are retained */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: risklens_ai_test
+      POSTGRES_USER: risklens_test
+      POSTGRES_PASSWORD: risklens_test_password
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U risklens_test -d risklens_ai_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - risklens-postgres-test-data:/var/lib/postgresql/data
+
+volumes:
+  risklens-postgres-test-data:

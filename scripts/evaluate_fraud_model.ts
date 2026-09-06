@@ -1,0 +1,36 @@
+import { FRAUD_MODEL_EVALUATION, evaluateFraudModel } from '../src/lib/ml_engine';
+import { FRAUD_TRAINING_ROWS, FRAUD_TEST_ROWS, FRAUD_MODEL_THRESHOLDS } from '../src/data/fraud_dataset';
+
+const metrics = evaluateFraudModel(FRAUD_TEST_ROWS);
+
+console.log('===============================================================');
+console.log('RISKLENS AI — FRAUD RISK ENGINE MODEL EVALUATION REPORT');
+console.log('===============================================================');
+console.log('Model Architecture: Deterministic Binary Logistic Regression');
+console.log('Dataset Origin:     Synthetic Labeled Financial Benchmark Dataset');
+console.log('Disclaimer:         Metrics reflect synthetic labeled development validation,');
+console.log('                    NOT live production merchant transaction streams.');
+console.log('---------------------------------------------------------------');
+console.log(`Training Samples:   ${metrics.trainRows}`);
+console.log(`Validation Samples: ${metrics.testRows} (Positives: ${metrics.positiveTestRows}, Negatives: ${metrics.negativeTestRows})`);
+console.log(`Decision Threshold: ${metrics.threshold} (Block/Review cutoff)`);
+console.log('---------------------------------------------------------------');
+console.log('PERFORMANCE METRICS:');
+console.log(`  ROC-AUC:               ${metrics.aucRoc}`);
+console.log(`  Precision:             ${(metrics.precision * 100).toFixed(2)}%`);
+console.log(`  Recall:                ${(metrics.recall * 100).toFixed(2)}%`);
+console.log(`  F1-Score:              ${(metrics.f1 * 100).toFixed(2)}%`);
+console.log(`  False Positive Rate:   ${(metrics.falsePositiveRate * 100).toFixed(2)}%`);
+console.log('---------------------------------------------------------------');
+console.log('CONFUSION MATRIX:');
+console.log(`  True Positives  (TP):  ${metrics.confusionMatrix.truePositive}`);
+console.log(`  True Negatives  (TN):  ${metrics.confusionMatrix.trueNegative}`);
+console.log(`  False Positives (FP):  ${metrics.confusionMatrix.falsePositive}`);
+console.log(`  False Negatives (FN):  ${metrics.confusionMatrix.falseNegative}`);
+console.log('---------------------------------------------------------------');
+console.log('BUSINESS IMPACT ESTIMATION (MODEL ASSUMPTION):');
+console.log(`  Assumed FP Cost / Alert: $${FRAUD_MODEL_THRESHOLDS.falsePositiveCostUsd.toFixed(2)}`);
+console.log(`  Calculated FP Overhead:  $${metrics.falsePositiveCostUsd.toFixed(2)}`);
+console.log('===============================================================');
+console.log('RAW JSON METRICS:');
+console.log(JSON.stringify(metrics, null, 2));

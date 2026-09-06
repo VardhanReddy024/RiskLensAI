@@ -1,0 +1,668 @@
+openapi: 3.0.3
+info:
+  title: RiskLens AI - Enterprise Fraud Intelligence API
+  description: |
+    Production-grade RESTful API for RiskLens AI. 
+    Provides multi-agent fraud investigation, persistent batch transaction ingestion,
+    real-time ML risk scoring, Gemini investigator copilot conversations, immutable audit logging,
+    and Prometheus/DevOps telemetry.
+  version: 2.4.0-prod
+  contact:
+    name: RiskLens Platform Engineering
+    email: platform@risklens.ai
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:3000
+    description: Local Container & Development Server
+  - url: https://risklens-ai-prod.a.run.app
+    description: Google Cloud Run Production Gateway
+
+tags:
+  - name: Health & DevOps
+    description: Kubernetes/Cloud Run health probes and Prometheus metrics
+  - name: Transactions
+    description: Transaction retrieval, search, and persistent batch ingestion
+  - name: Multi-Agent Investigations
+    description: 8-agent autonomous risk orchestration & dossier generation
+  - name: AI Copilot
+    description: Interactive Gemini conversational assistant with transaction grounding
+  - name: Analyst Actions & Audits
+    description: Human-in-the-loop transaction resolution and immutable audit trails
+  - name: Analytics
+    description: Portfolio fraud loss prevented, tier breakdown, and aggregate statistics
+
+paths:
+  /api/health/live:
+    get:
+      tags:
+        - Health & DevOps
+      summary: Liveness Probe
+      description: Returns 200 UP if the Node.js event loop and HTTP server are responsive.
+      operationId: getLiveness
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+                  liveness:
+                    type: boolean
+                    example: true
+                  service:
+                    type: string
+                    example: risklens-ai
+                  version:
+                    type: string
+                    example: 2.4.0-prod
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/health/ready:
+    get:
+      tags:
+        - Health & DevOps
+      summary: Readiness Probe
+      description: Verifies persistent database connectivity, ML engine, and AI integrations.
+      operationId: getReadiness
+      responses:
+        '200':
+          description: All subsystems are healthy and ready for traffic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Subsystem degraded or initializing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+  /api/health:
+    get:
+      tags:
+        - Health & DevOps
+      summary: Health Overview
+      description: Returns full status overview of databases, services, and record counts.
+      operationId: getHealthOverview
+      responses:
+        '200':
+          description: Health overview payload
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/metrics:
+    get:
+      tags:
+        - Health & DevOps
+      summary: Prometheus & System Metrics
+      description: Exposes Prometheus-formatted metrics (if Accept is text/plain or format=prometheus) or JSON telemetry.
+      operationId: getMetrics
+      parameters:
+        - name: format
+          in: query
+          description: Request Prometheus raw format
+          required: false
+          schema:
+            type: string
+            enum: [prometheus, json]
+      responses:
+        '200':
+          description: System metrics stream
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP risklens_http_requests_total Total number of HTTP requests processed
+                  # TYPE risklens_http_requests_total counter
+                  risklens_http_requests_total 42
+            application/json:
+              schema:
+                type: object
+
+  /api/transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Query Transactions
+      description: Retrieves transactions from persistent Firestore/in-memory store with filtering.
+      operationId: getTransactions
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status
+          required: false
+          schema:
+            type: string
+            enum: [approved, flagged, held, escalated, rejected, pending]
+        - name: tier
+          in: query
+          description: Filter by risk tier
+          required: false
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        - name: search
+          in: query
+          description: Free-text search on transaction ID, customer name, merchant, or location
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of transactions matching query criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  total:
+                    type: integer
+                    example: 250
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/transactions/{id}:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transaction by ID
+      description: Retrieves a single transaction record by its unique identifier.
+      operationId: getTransactionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transaction identifier (e.g. TX-2026-9041)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/transactions/batch:
+    post:
+      tags:
+        - Transactions
+      summary: Ingest Transaction Batch
+      description: Ingests, ML-evaluates, and persists a batch of transactions with immutable audit logging.
+      operationId: ingestTransactionBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transactions
+              properties:
+                transactions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Transaction'
+      responses:
+        '200':
+          description: Batch successfully processed and persisted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  ingestedCount:
+                    type: integer
+                    example: 25
+                  totalDbCount:
+                    type: integer
+                    example: 275
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/investigate/{id}:
+    post:
+      tags:
+        - Multi-Agent Investigations
+      summary: Run 8-Agent Investigation Dossier
+      description: Triggers autonomous 8-agent swarm analysis (Network, Velocity, Device, ML, Geolocation, Gemini Synthesis).
+      operationId: runInvestigation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transaction ID to investigate
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction:
+                  $ref: '#/components/schemas/Transaction'
+      responses:
+        '200':
+          description: Comprehensive investigation dossier
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  dossier:
+                    $ref: '#/components/schemas/InvestigationDossier'
+                  cached:
+                    type: boolean
+                    example: false
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/copilot/chat:
+    post:
+      tags:
+        - AI Copilot
+      summary: Interactive Copilot Chat Turn
+      description: Context-aware conversational chat turn with Gemini AI grounded on active transaction and agent telemetry.
+      operationId: copilotChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction
+                - message
+              properties:
+                transaction:
+                  $ref: '#/components/schemas/Transaction'
+                chatHistory:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ChatMessage'
+                message:
+                  type: string
+                  example: "Why was this transaction assigned a CRITICAL risk tier?"
+      responses:
+        '200':
+          description: Copilot AI generated response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  reply:
+                    type: string
+                    example: "Transaction TX-2026-9041 exhibits impossible travel velocity (4,200 km/h) combined with high-risk crypto merchant MCC."
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/actions/resolve:
+    post:
+      tags:
+        - Analyst Actions & Audits
+      summary: Resolve Transaction with Audit Trail
+      description: Transitions transaction status (APPROVE, HOLD, ESCALATE, REJECT) and writes immutable audit record.
+      operationId: resolveAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transactionId
+                - action
+              properties:
+                transactionId:
+                  type: string
+                  example: "TX-2026-9041"
+                action:
+                  type: string
+                  enum: [APPROVE, HOLD, ESCALATE, REJECT]
+                  example: "APPROVE"
+                notes:
+                  type: string
+                  example: "Customer verified travel itinerary via SMS OTP confirmation."
+                actorEmail:
+                  type: string
+                  example: "senior_analyst@risklens.ai"
+                actorRole:
+                  type: string
+                  example: "lead_fraud_investigator"
+      responses:
+        '200':
+          description: Action executed and audit record recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  transaction:
+                    $ref: '#/components/schemas/Transaction'
+                  auditLog:
+                    $ref: '#/components/schemas/AuditLog'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/analytics/metrics:
+    get:
+      tags:
+        - Analytics
+      summary: Portfolio Analytics & Loss Prevention
+      description: Returns aggregated fraud prevention totals, loss prevented, risk tier counts, and recent audit activity.
+      operationId: getAnalyticsMetrics
+      parameters:
+        - name: limit
+          in: query
+          description: Number of recent audit logs to include
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Aggregated analytics metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsMetrics'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  responses:
+    ValidationError:
+      description: Validation Error (400 Bad Request)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: "Missing 'transactions' field in request body"
+            requestId: "req_1723080000_a1b2c3d"
+            timestamp: "2026-08-08T00:00:00.000Z"
+
+    NotFoundError:
+      description: Resource Not Found (404)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: "Transaction TX-999 not found"
+            requestId: "req_1723080000_a1b2c3d"
+            timestamp: "2026-08-08T00:00:00.000Z"
+
+    RateLimitError:
+      description: Rate Limit Exceeded (429)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            success: false
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: "Too many requests from this IP. Please retry later."
+            requestId: "req_1723080000_a1b2c3d"
+            timestamp: "2026-08-08T00:00:00.000Z"
+
+    InternalServerError:
+      description: Internal Server Error (500)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+
+  schemas:
+    StandardErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Invalid request parameters
+            details:
+              type: object
+        requestId:
+          type: string
+          example: req_1723080000_9041xyz
+        timestamp:
+          type: string
+          format: date-time
+
+    ReadinessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DEGRADED, DOWN]
+        readiness:
+          type: boolean
+        service:
+          type: string
+        version:
+          type: string
+        database:
+          type: object
+        services:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    Transaction:
+      type: object
+      required:
+        - id
+        - amount
+        - customerId
+        - customerName
+        - timestamp
+      properties:
+        id:
+          type: string
+          example: TX-2026-9041
+        amount:
+          type: number
+          example: 4850.00
+        currency:
+          type: string
+          example: USD
+        customerId:
+          type: string
+          example: CUST-8821
+        customerName:
+          type: string
+          example: Alexander Vance
+        merchant:
+          type: string
+          example: CoinBase Global Exchange
+        merchantCategory:
+          type: string
+          example: Crypto / High Risk
+        status:
+          type: string
+          enum: [approved, flagged, held, escalated, rejected, pending]
+          example: flagged
+        riskScore:
+          type: integer
+          example: 87
+        riskTier:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+          example: HIGH
+        fraudProbability:
+          type: number
+          example: 0.89
+        confidenceScore:
+          type: number
+          example: 0.94
+        location:
+          type: string
+          example: Lagos, Nigeria
+        ipAddress:
+          type: string
+          example: 102.89.23.11
+        deviceType:
+          type: string
+          example: Linux / TOR Exit Node
+        timestamp:
+          type: string
+          format: date-time
+
+    InvestigationDossier:
+      type: object
+      properties:
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+        agents:
+          type: array
+          items:
+            type: object
+        recommendation:
+          type: object
+          properties:
+            primaryAction:
+              type: string
+              enum: [APPROVE, HOLD, ESCALATE, REJECT]
+            confidence:
+              type: number
+            rationale:
+              type: string
+            estimatedLossPrevented:
+              type: number
+
+    ChatMessage:
+      type: object
+      required:
+        - role
+        - text
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, model]
+        text:
+          type: string
+        timestamp:
+          type: string
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        actorEmail:
+          type: string
+        actorRole:
+          type: string
+        action:
+          type: string
+        targetId:
+          type: string
+        details:
+          type: string
+        status:
+          type: string
+
+    AnalyticsMetrics:
+      type: object
+      properties:
+        totalTransactions:
+          type: integer
+        flaggedTransactions:
+          type: integer
+        totalLossPrevented:
+          type: number
+        highRiskRate:
+          type: number
+        averageRiskScore:
+          type: number
+        riskTierDistribution:
+          type: object
+        statusDistribution:
+          type: object
+        recentAuditLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
