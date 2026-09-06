@@ -76,7 +76,7 @@ jobs:
           POSTGRES_USER: risklens_test
           POSTGRES_PASSWORD: risklens_test_password
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U risklens_test -d risklens_ai_test"
           --health-interval 5s
@@ -107,7 +107,7 @@ jobs:
       - name: 🧪 Automated Test Suite Gate
         env:
           NODE_ENV: test
-          DATABASE_URL: postgresql://risklens_test:risklens_test_password@localhost:5432/risklens_ai_test
+          DATABASE_URL: postgresql://risklens_test:risklens_test_password@localhost:5433/risklens_ai_test
           DATA_STORE_PROVIDER: postgres
           STRICT_DATABASE: 'true'
           DATABASE_SSL: 'false'
