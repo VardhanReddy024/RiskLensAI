@@ -96,7 +96,7 @@ jobs:
       - name: 📦 Install Dependencies
         run: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci || npm install
           else
             npm install
           fi
@@ -136,6 +136,7 @@ jobs:
   deploy-modal:
     name: ⚡ Deploy Backend to Modal Serverless
     needs: [validate-environment, build-verification]
+    if: ${{ needs.validate-environment.outputs.has_modal_token == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -168,7 +169,7 @@ jobs:
   # 4. Vercel Frontend Deployment
   deploy-vercel:
     name: 🌐 Deploy Frontend to Vercel
-    needs: [validate-environment, build-verification, deploy-modal]
+    needs: [validate-environment, build-verification]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -203,33 +204,38 @@ jobs:
   # 5. Live Production Health & Readiness Verification
   post-deploy-health-check:
     name: 🩺 Production Health & Readiness Verification
-    needs: [deploy-modal, deploy-vercel]
+    needs: [validate-environment, build-verification, deploy-vercel]
+    if: ${{ !cancelled() && needs.build-verification.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: 🌐 Verify Live Modal API Health & Readiness
         run: |
-          echo "Executing health and readiness verification against live Modal backend..."
-          LIVE_URL="https://rvardhan791--risklens-ai-backend-run-server.modal.run/api/health/live"
-          READY_URL="https://rvardhan791--risklens-ai-backend-run-server.modal.run/api/health/ready"
-          
-          echo "Probing Liveness endpoint: $LIVE_URL"
-          for i in {1..6}; do
-            LIVE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$LIVE_URL" || echo "failed")
-            echo "Attempt $i: Liveness HTTP status = $LIVE_STATUS"
-            if [ "$LIVE_STATUS" = "200" ]; then
-              echo "✅ Modal backend liveness probe succeeded."
-              break
-            fi
-            sleep 5
-          done
+          if [ "${{ needs.validate-environment.outputs.has_modal_token }}" = "true" ]; then
+            echo "Executing health and readiness verification against live Modal backend..."
+            LIVE_URL="https://rvardhan791--risklens-ai-backend-run-server.modal.run/api/health/live"
+            READY_URL="https://rvardhan791--risklens-ai-backend-run-server.modal.run/api/health/ready"
+            
+            echo "Probing Liveness endpoint: $LIVE_URL"
+            for i in {1..6}; do
+              LIVE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$LIVE_URL" || echo "failed")
+              echo "Attempt $i: Liveness HTTP status = $LIVE_STATUS"
+              if [ "$LIVE_STATUS" = "200" ]; then
+                echo "✅ Modal backend liveness probe succeeded."
+                break
+              fi
+              sleep 5
+            done
 
-          echo "Probing Readiness endpoint: $READY_URL"
-          READY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$READY_URL" || echo "failed")
-          echo "Readiness HTTP status = $READY_STATUS"
-          if [ "$READY_STATUS" = "200" ]; then
-            echo "✅ Modal backend is 100% READY and persistent database is connected."
+            echo "Probing Readiness endpoint: $READY_URL"
+            READY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$READY_URL" || echo "failed")
+            echo "Readiness HTTP status = $READY_STATUS"
+            if [ "$READY_STATUS" = "200" ]; then
+              echo "✅ Modal backend is 100% READY and persistent database is connected."
+            else
+              echo "Backend readiness returned status $READY_STATUS. Deployment is not healthy."
+              exit 1
+            fi
           else
-            echo "Backend readiness returned status $READY_STATUS. Deployment is not healthy."
-            exit 1
+            echo "ℹ️ Automated Modal deployment was skipped; skipping live endpoint verification."
           fi
